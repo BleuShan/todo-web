@@ -1,13 +1,17 @@
-module.exports = {
+import cssnano from 'cssnano'
+import fontMagician from 'postcss-font-magician'
+import preset from 'postcss-preset-env'
+
+export default {
   syntax: 'postcss-scss',
-  plugins: {
-    'postcss-preset-env': {
+  plugins: [
+    preset({
       stage: 0
-    },
-    cssnano: {
+    }),
+    cssnano({
       preset: 'advanced'
-    },
-    'postcss-font-magician': {
+    }),
+    fontMagician({
       display: 'swap',
       variants: {
         Roboto: {
@@ -17,6 +21,6 @@ module.exports = {
         }
       },
       foundries: 'google'
-    }
-  }
+    })
+  ]
 }

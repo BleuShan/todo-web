@@ -122,5 +122,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-
+# output directories
 assets
+wasm

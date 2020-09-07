@@ -1,0 +1,72 @@
+[config]
+skip_core_tasks = true
+
+[env]
+CARGO_MAKE_CARGO_TARGET_DIR          = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/target"
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+CARGO_MAKE_WORKSPACE_SKIP_MEMBERS    = ["shared"]
+NODE_ENV                             = "${CARGO_MAKE_PROFILE}"
+TODO_WEB_ASSETS_DIR                  = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/assets"
+
+    [env.development]
+    CARGO_MAKE_CARGO_BUILD_FLAVOR = "debug"
+
+    [env.production]
+    CARGO_MAKE_CARGO_BUILD_FLAVOR        = "release"
+    CARGO_MAKE_CARGO_BUILD_RELEASE_FLAGS = "--release"
+
+[tasks.init.env]
+TODO_WEB_OUT_DIR = "${CARGO_MAKE_CARGO_TARGET_DIR}/${CARGO_MAKE_CARGO_BUILD_FLAVOR}"
+
+[tasks.env]
+command = "env"
+
+[tasks.default]
+alias       = "build-flow"
+category    = "Development"
+description = "Default task points to the build flow"
+
+[tasks.pre-clean]
+category    = "cleanup"
+description = "pre clean hook"
+
+[tasks.clean]
+args         = ["clean"]
+category     = "cleanup"
+command      = "cargo"
+dependencies = ["pre-clean"]
+description  = "runs cargo clean"
+
+[tasks.post-clean]
+category    = "cleanup"
+description = "post clean hook"
+
+[tasks.clean-flow]
+category     = "cleanup"
+dependencies = ["pre-clean", "clean", "post-clean"]
+description  = "Run the associated tasks to cleanup everything"
+
+[tasks.pre-build]
+category    = "Build"
+description = "pre build hook"
+
+[tasks.build]
+args        = [
+    "build",
+    "@@remove-empty(CARGO_MAKE_CARGO_BUILD_RELEASE_FLAGS)",
+    "@@remove-empty(CARGO_MAKE_CARGO_VERBOSE_FLAGS)",
+    "@@split(CARGO_MAKE_CARGO_BUILD_TEST_FLAGS, )",
+]
+category    = "Build"
+command     = "cargo"
+description = "runs cargo build"
+
+
+[tasks.post-build]
+category    = "Build"
+description = "post build hook"
+
+[tasks.build-flow]
+category     = "Build"
+dependencies = ["pre-build", "build", "post-build"]
+description  = "Run the associated tasks to build a project"

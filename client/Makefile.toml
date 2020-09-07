@@ -1,0 +1,48 @@
+[tasks.init.env]
+TODO_WEB_OUT_DIR                = "${CARGO_MAKE_CARGO_TARGET_DIR}/${CARGO_MAKE_CRATE_TARGET_TRIPLE}/${CARGO_MAKE_CARGO_BUILD_FLAVOR}"
+TODO_WEB_WASM_BINDGEN_FILE_NAME = "${CARGO_MAKE_CRATE_FS_NAME}_bg.wasm"
+TODO_WEB_WASM_FILE_NAME         = "${CARGO_MAKE_CRATE_FS_NAME}.wasm"
+TODO_WEB_WASM_OUT_FILE          = "${TODO_WEB_OUT_DIR}/${TODO_WEB_WASM_FILE_NAME}"
+
+[tasks.clean-assets]
+args        = ["-rf", "${TODO_WEB_ASSETS_DIR}"]
+category    = "Build"
+command     = "rm"
+description = "remove asset dir if needed"
+        [tasks.clean-assets.condition]
+        files_exist = [
+            "${TODO_WEB_ASSETS_DIR}/${TODO_WEB_WASM_BINDGEN_FILE_NAME}",
+        ]
+
+[tasks.post-clean]
+dependencies = ["clean-assets"]
+
+[tasks.pre-build]
+dependencies = ["clean-assets"]
+
+[tasks.post-build]
+dependencies = ["wasm-bindgen", "rollup"]
+
+[tasks.rollup]
+args        = ["rollup", "-c"]
+category    = "Build"
+command     = "yarn"
+description = "runs rollup"
+
+[tasks.install-wasm-bindgen]
+category      = "wasm"
+description   = "Installs wasm-bindgen crate."
+install_crate = { crate_name = "wasm-bindgen", binary = "wasm-bindgen", test_arg = "-V" }
+
+[tasks.wasm-bindgen]
+args         = [
+    "--out-dir",
+    "${TODO_WEB_ASSETS_DIR}",
+    "--target",
+    "web",
+    "--no-typescript",
+    "${TODO_WEB_WASM_OUT_FILE}",
+]
+category     = "wasm"
+command      = "wasm-bindgen"
+dependencies = ["install-wasm-bindgen"]
