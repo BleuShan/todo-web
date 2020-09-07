@@ -1,38 +1,62 @@
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const path = require('path')
+const {name: outName, main: entryFile} = require('./package.json')
+const {resolve: resolvePath} = require('path')
 
-module.exports = {
-  mode: 'production',
-  entry: path.resolve(__dirname, 'main.js'),
-  module: {
-    rules: [
-      {
-        test: /\.s?css$/,
-        use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: 'css-loader',
-            options: {importLoaders: 1}
-          },
-          'postcss-loader'
-        ]
-      }
+function resolvePathFromDir(...args) {
+  return resolvePath(__dirname, ...args)
+}
+
+module.exports = () => {
+  const entry = resolvePathFromDir(entryFile)
+  const output = {
+    path: resolvePathFromDir('..', 'assets')
+  }
+  const wasmDir = resolvePathFromDir('wasm')
+  return {
+    mode: 'production',
+    entry,
+    module: {
+      rules: [
+        {
+          test: /\.s?css$/,
+          use: [
+            MiniCssExtractPlugin.loader,
+            {
+              loader: 'css-loader',
+              options: {
+                importLoaders: 2
+              }
+            },
+            {
+              loader: 'postcss-loader'
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                implementation: require('sass'),
+                sassOptions: {
+                  fiber: require('fibers')
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    output,
+    plugins: [
+      new MiniCssExtractPlugin({filename: '[name].[hash].css'}),
+      new HtmlWebpackPlugin({
+        template: resolvePathFromDir('index.ejs')
+      }),
+      new WasmPackPlugin({
+        crateDirectory: __dirname,
+        outDir: wasmDir,
+        extraArgs: '--no-typescript',
+        outName
+      })
     ]
-  },
-  output: {
-    path: path.resolve(__dirname, '..', 'assets')
-  },
-  plugins: [
-    new MiniCssExtractPlugin({filename: '[name].[hash].css'}),
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'index.ejs')
-    }),
-    new WasmPackPlugin({
-      crateDirectory: __dirname,
-      outDir: path.resolve(__dirname, 'wasm'),
-      outName: 'todo-web-client'
-    })
-  ]
+  }
 }
