@@ -4,8 +4,24 @@ edition = "2018"
 name    = "todo-web-shared"
 version = "0.1.0"
 
+[features]
+actix = ["askama/with-actix-web", "actix-web", "askama_actix"]
+
 [dependencies]
 serde_json = "1.0.57"
+
+
+    [dependencies.actix-web]
+    optional = true
+    version  = "2.0.0"
+
+    [dependencies.askama]
+    features = ["serde-json"]
+    version  = "0.10.3"
+
+    [dependencies.askama_actix]
+    optional = true
+    version  = "0.10.0"
 
     [dependencies.serde]
     features = ["derive"]

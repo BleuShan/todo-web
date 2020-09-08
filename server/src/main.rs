@@ -19,26 +19,26 @@ use actix_web::{
     HttpServer,
 };
 use listenfd::ListenFd;
+use todo_web_shared::views::Layout;
 
 #[get("/")]
-async fn index() -> &'static str {
-    "Hello World!"
+async fn index() -> Layout {
+    Layout::new(env!("CARGO_PKG_NAME").to_owned())
 }
 
-#[actix_web::main]
+#[actix_rt::main]
 async fn main() -> Result<()> {
     let _logger = Logger::init()?;
     color_eyre::install()?;
     let config = tls::config().await?;
     let mut server = HttpServer::new(|| {
-        let files = fs::Files::new("/", "./assets").index_file("index.html");
+        let assets = fs::Files::new("/assets", "./assets");
         App::new()
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::new(ContentEncoding::Auto))
-            .default_service(files)
+            .service(index)
+            .service(assets)
     });
-
-
 
     let mut listenfd = ListenFd::from_env();
     server = if let Some(listener) = listenfd.take_tcp_listener(0)? {

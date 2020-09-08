@@ -7,6 +7,7 @@ import postcssConfig from './postcss.config.mjs'
 import {terser} from 'rollup-plugin-terser'
 
 const DIRNAME = dirname(fileURLToPath(import.meta.url))
+const EXTERNALS = [/todo_web_client\.js/]
 
 async function loadPkgJson() {
   const buffer = await fs.readFile(resolve(DIRNAME, 'package.json'))
@@ -19,6 +20,7 @@ async function buildConfig() {
 
   return {
     input,
+    external: (id) => EXTERNALS.some((pattern) => pattern.test(id)),
     output: {
       dir,
       format: 'esm'

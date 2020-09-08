@@ -1,3 +1,5 @@
+extend = "../Makefile.toml"
+
 [tasks.init.env]
 TODO_WEB_OUT_DIR                = "${CARGO_MAKE_CARGO_TARGET_DIR}/${CARGO_MAKE_CRATE_TARGET_TRIPLE}/${CARGO_MAKE_CARGO_BUILD_FLAVOR}"
 TODO_WEB_WASM_BINDGEN_FILE_NAME = "${CARGO_MAKE_CRATE_FS_NAME}_bg.wasm"
@@ -42,6 +44,7 @@ args         = [
     "web",
     "--no-typescript",
     "${TODO_WEB_WASM_OUT_FILE}",
+    "--weak-refs",
 ]
 category     = "wasm"
 command      = "wasm-bindgen"

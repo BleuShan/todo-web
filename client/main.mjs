@@ -1,5 +1,6 @@
-import './main.scss'
+import './stylesheets/main.scss'
+import loadWasm from './todo_web_client.js'
 ;(async function main() {
-  const app = await import('todo_web_client.js')
-  app.render(document.querySelector('#root'))
+  const app = await loadWasm()
+  app.render('#root')
 })()

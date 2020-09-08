@@ -7,11 +7,12 @@ version = "0.1.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-actix-files        = "0.3.0-beta.1"
+actix-files        = "0.2.2"
+actix-rt           = "1.1.1"
 base64             = "0.12.3"
 color-eyre         = "0.5"
 listenfd           = "0.3"
-rustls             = "0.18.1"
+rustls             = "0.16.0"
 serde_json         = "1.0.57"
 tracing            = "0.1.19"
 tracing-error      = "0.1.2"
@@ -20,7 +21,7 @@ tracing-subscriber = "0.2.11"
 
     [dependencies.actix-web]
     features = ["rustls"]
-    version  = "3.0.0-beta.3"
+    version  = "2.0.0"
 
     [dependencies.async-std]
     features = ["unstable"]
@@ -31,4 +32,5 @@ tracing-subscriber = "0.2.11"
     version  = "1.0.115"
 
     [dependencies.todo-web-shared]
-    path = "../shared"
+    features = ["actix"]
+    path     = "../shared"
