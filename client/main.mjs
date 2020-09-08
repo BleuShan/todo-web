@@ -6,4 +6,4 @@ async function main() {
   render('#root')
 }
 
-window.addEventListener('DOMContentLoaded', main, {once: true})
+window.addEventListener('load', main, {once: true})

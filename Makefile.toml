@@ -12,8 +12,8 @@ TODO_WEB_ASSETS_DIR                  = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY
     CARGO_MAKE_CARGO_BUILD_FLAVOR = "debug"
 
     [env.production]
-    CARGO_MAKE_CARGO_BUILD_FLAVOR        = "release"
-    CARGO_MAKE_CARGO_BUILD_RELEASE_FLAGS = "--release"
+    CARGO_MAKE_CARGO_BUILD_FLAGS  = "--release"
+    CARGO_MAKE_CARGO_BUILD_FLAVOR = "release"
 
 [tasks.init.env]
 TODO_WEB_OUT_DIR = "${CARGO_MAKE_CARGO_TARGET_DIR}/${CARGO_MAKE_CARGO_BUILD_FLAVOR}"
@@ -53,9 +53,8 @@ description = "pre build hook"
 [tasks.build]
 args        = [
     "build",
-    "@@remove-empty(CARGO_MAKE_CARGO_BUILD_RELEASE_FLAGS)",
+    "@@split(CARGO_MAKE_CARGO_BUILD_FLAGS, )",
     "@@remove-empty(CARGO_MAKE_CARGO_VERBOSE_FLAGS)",
-    "@@split(CARGO_MAKE_CARGO_BUILD_TEST_FLAGS, )",
 ]
 category    = "Build"
 command     = "cargo"

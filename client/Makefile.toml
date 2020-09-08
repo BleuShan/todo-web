@@ -1,10 +1,13 @@
 extend = "../Makefile.toml"
 
 [tasks.init.env]
+CARGO_MAKE_CARGO_BUILD_FLAGS    = "--release"
 TODO_WEB_OUT_DIR                = "${CARGO_MAKE_CARGO_TARGET_DIR}/${CARGO_MAKE_CRATE_TARGET_TRIPLE}/${CARGO_MAKE_CARGO_BUILD_FLAVOR}"
 TODO_WEB_WASM_BINDGEN_FILE_NAME = "${CARGO_MAKE_CRATE_FS_NAME}_bg.wasm"
+TODO_WEB_WASM_BINDGEN_OUT_FILE  = "${TODO_WEB_ASSETS_DIR}/${TODO_WEB_WASM_BINDGEN_FILE_NAME}"
 TODO_WEB_WASM_FILE_NAME         = "${CARGO_MAKE_CRATE_FS_NAME}.wasm"
 TODO_WEB_WASM_OUT_FILE          = "${TODO_WEB_OUT_DIR}/${TODO_WEB_WASM_FILE_NAME}"
+WASM_BINDGEN_WEAKREF            = 1
 
 [tasks.clean-assets]
 args        = ["-rf", "${TODO_WEB_ASSETS_DIR}"]
@@ -12,9 +15,7 @@ category    = "Build"
 command     = "rm"
 description = "remove asset dir if needed"
         [tasks.clean-assets.condition]
-        files_exist = [
-            "${TODO_WEB_ASSETS_DIR}/${TODO_WEB_WASM_BINDGEN_FILE_NAME}",
-        ]
+        files_exist = ["${TODO_WEB_WASM_BINDGEN_OUT_FILE}"]
 
 [tasks.post-clean]
 dependencies = ["clean-assets"]
@@ -23,7 +24,7 @@ dependencies = ["clean-assets"]
 dependencies = ["clean-assets"]
 
 [tasks.post-build]
-dependencies = ["wasm-bindgen", "rollup"]
+dependencies = ["wasm-bindgen", "wasm-opt", "rollup"]
 
 [tasks.rollup]
 args        = ["rollup", "-c"]
@@ -49,3 +50,14 @@ args         = [
 category     = "wasm"
 command      = "wasm-bindgen"
 dependencies = ["install-wasm-bindgen"]
+description  = "runs wasmbindgen"
+
+[tasks.wasm-opt]
+args     = [
+    "${TODO_WEB_WASM_BINDGEN_OUT_FILE}",
+    "-O4",
+    "-o",
+    "${TODO_WEB_WASM_BINDGEN_OUT_FILE}",
+]
+category = "wasm"
+command  = "wasm-opt"

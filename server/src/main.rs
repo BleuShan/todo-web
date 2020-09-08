@@ -30,7 +30,7 @@ async fn main() -> Result<()> {
     let _logger = Logger::init()?;
     let config = tls::config().await?;
     let mut server = HttpServer::new(|| {
-        let assets = fs::Files::new("/assets", "./assets");
+        let assets = fs::Files::new("/", "./assets");
         App::new()
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::new(ContentEncoding::Auto))

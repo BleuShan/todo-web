@@ -5,7 +5,7 @@ use tracing_subscriber::{
     EnvFilter,
 };
 
-#[cfg(not(arch = "wasm32"))]
+#[cfg(not(target_arch = "wasm32"))]
 use tracing_subscriber::fmt::{
     self,
     format::{
@@ -15,7 +15,7 @@ use tracing_subscriber::fmt::{
     Layer as FormatLayer,
 };
 
-#[cfg(all(feature = "wasm", arch = "wasm32"))]
+#[cfg(all(feature = "wasm", target_arch = "wasm32"))]
 use tracing_wasm::{
     WASMLayer,
     WASMLayerConfig,
@@ -38,7 +38,7 @@ impl Logger {
         Ok(Self)
     }
 
-    #[cfg(not(arch = "wasm32"))]
+    #[cfg(not(target_arch = "wasm32"))]
     fn install_panic_hook<RegistryType>(registry: RegistryType) -> Result<()>
     where
         RegistryType: Into<tracing::Dispatch>,
@@ -48,7 +48,7 @@ impl Logger {
         Ok(())
     }
 
-    #[cfg(all(feature = "wasm", arch = "wasm32"))]
+    #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
     fn install_panic_hook<RegistryType>(registry: RegistryType) -> Result<()>
     where
         RegistryType: Into<tracing::Dispatch>,
@@ -59,14 +59,14 @@ impl Logger {
         Ok(())
     }
 
-    #[cfg(not(arch = "wasm32"))]
+    #[cfg(not(target_arch = "wasm32"))]
     fn make_output_layer<S>() -> FormatLayer<S, DefaultFields, Format, impl Fn() -> std::io::Stderr>
     {
         fmt::layer().with_writer(|| std::io::stderr())
     }
 
-    #[cfg(all(feature = "wasm", arch = "wasm32"))]
-    fn make_output_layer<S>() -> WASMLayer {
+    #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
+    fn make_output_layer() -> WASMLayer {
         let config = WASMLayerConfig::default();
         WASMLayer::new(config)
     }

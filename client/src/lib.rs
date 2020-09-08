@@ -11,13 +11,13 @@ use wee_alloc::WeeAlloc;
 #[global_allocator]
 static ALLOC: WeeAlloc<'_> = WeeAlloc::INIT;
 
-#[instrument]
 #[wasm_bindgen]
-pub fn render(selector: String) -> JSResult<()> {
+pub fn render(selector: &str) -> JSResult<()> {
     let _logger = Logger::init().map_err(|_| "Failed to initialize loggger")?;
     let window = web_sys::window().expect("Failed to acquire window");
     let document = window.document().expect("Failed to acquire document");
-    info!("{}", selector);
+
+    info!("hey !");
     let root = document
         .query_selector(&selector)?
         .expect("Failed to acquire root");
