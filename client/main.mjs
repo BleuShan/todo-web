@@ -1,6 +1,9 @@
 import './stylesheets/main.scss'
-import loadWasm from './todo_web_client.js'
-;(async function main() {
-  const app = await loadWasm()
-  app.render('#root')
-})()
+import init, {render} from './todo_web_client.js'
+
+async function main() {
+  await init()
+  render('#root')
+}
+
+window.addEventListener('DOMContentLoaded', main, {once: true})

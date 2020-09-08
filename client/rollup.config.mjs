@@ -22,7 +22,7 @@ async function buildConfig() {
     input,
     external: (id) => EXTERNALS.some((pattern) => pattern.test(id)),
     output: {
-      dir,
+      file: resolve(dir, input),
       format: 'esm'
     },
     plugins: [

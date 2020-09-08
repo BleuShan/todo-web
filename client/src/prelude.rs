@@ -1,3 +1,4 @@
+pub use todo_web_shared::prelude::*;
 pub use wasm_bindgen::{
     prelude::*,
     JsCast,

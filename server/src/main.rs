@@ -2,14 +2,10 @@
 #![warn(missing_debug_implementations, nonstandard_style, rust_2018_idioms)]
 #![feature(format_args_capture)]
 
-mod logger;
 mod prelude;
 mod tls;
 
-use self::{
-    logger::Logger,
-    prelude::*,
-};
+use self::prelude::*;
 use actix_files as fs;
 use actix_web::{
     get,
@@ -19,7 +15,10 @@ use actix_web::{
     HttpServer,
 };
 use listenfd::ListenFd;
-use todo_web_shared::views::Layout;
+use todo_web_shared::{
+    views::Layout,
+    Logger,
+};
 
 #[get("/")]
 async fn index() -> Layout {
@@ -29,7 +28,6 @@ async fn index() -> Layout {
 #[actix_rt::main]
 async fn main() -> Result<()> {
     let _logger = Logger::init()?;
-    color_eyre::install()?;
     let config = tls::config().await?;
     let mut server = HttpServer::new(|| {
         let assets = fs::Files::new("/assets", "./assets");

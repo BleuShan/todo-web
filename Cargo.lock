@@ -658,9 +658,12 @@ version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "942f72db697d8767c22d46a598e01f2d3b475501ea43d0db4f16d90259182d0b"
 dependencies = [
+ "js-sys",
  "num-integer",
  "num-traits",
+ "serde",
  "time",
+ "wasm-bindgen",
 ]
 
 [[package]]
@@ -1889,23 +1892,17 @@ dependencies = [
  "actix-web",
  "async-std",
  "base64 0.12.3",
- "color-eyre",
  "listenfd",
  "rustls",
  "serde",
  "serde_json",
  "todo-web-shared",
- "tracing",
- "tracing-error",
- "tracing-futures",
- "tracing-subscriber",
 ]
 
 [[package]]
 name = "todo-web-client"
 version = "0.1.0"
 dependencies = [
- "console_error_panic_hook",
  "js-sys",
  "serde",
  "serde_json",
@@ -1923,8 +1920,16 @@ dependencies = [
  "actix-web",
  "askama",
  "askama_actix",
+ "chrono",
+ "color-eyre",
+ "console_error_panic_hook",
  "serde",
  "serde_json",
+ "tracing",
+ "tracing-error",
+ "tracing-futures",
+ "tracing-subscriber",
+ "tracing-wasm",
 ]
 
 [[package]]
@@ -2088,6 +2093,17 @@ dependencies = [
  "tracing-core",
  "tracing-log",
  "tracing-serde",
+]
+
+[[package]]
+name = "tracing-wasm"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd96394d3d2f119de6c1078fa065b99217db4377f9aac6e87f8393276a0d7962"
+dependencies = [
+ "tracing",
+ "tracing-subscriber",
+ "wasm-bindgen",
 ]
 
 [[package]]

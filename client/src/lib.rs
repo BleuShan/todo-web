@@ -5,29 +5,31 @@
 mod prelude;
 
 use self::prelude::*;
-use console_error_panic_hook;
+use todo_web_shared::Logger;
 use wee_alloc::WeeAlloc;
 
 #[global_allocator]
 static ALLOC: WeeAlloc<'_> = WeeAlloc::INIT;
 
+#[instrument]
 #[wasm_bindgen]
-pub fn render(selector: &str) -> JSResult<()> {
-    console_error_panic_hook::set_once();
+pub fn render(selector: String) -> JSResult<()> {
+    let _logger = Logger::init().map_err(|_| "Failed to initialize loggger")?;
     let window = web_sys::window().expect("Failed to acquire window");
     let document = window.document().expect("Failed to acquire document");
-    let root = document.query_selector(selector)?;
+    info!("{}", selector);
+    let root = document
+        .query_selector(&selector)?
+        .expect("Failed to acquire root");
 
-    println!("{root:?}");
+    while let Some(ref child) = root.first_child() {
+        root.remove_child(child)?;
+    }
 
-    // while let Some(ref child) = root.first_child() {
-    //     root.remove_child(child)?;
-    // }
-
-    // let text = document.create_text_node("Hi!");
-    // let content = document.create_element("h1")?;
-    // content.append_child(&text)?;
-    // root.append_child(&content)?;
+    let text = document.create_text_node("Hi!");
+    let content = document.create_element("h1")?;
+    content.append_child(&text)?;
+    root.append_child(&content)?;
 
     Ok(())
 }
