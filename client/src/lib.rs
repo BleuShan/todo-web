@@ -17,7 +17,6 @@ pub fn render(selector: &str) -> JSResult<()> {
     let window = web_sys::window().expect("Failed to acquire window");
     let document = window.document().expect("Failed to acquire document");
 
-    info!("hey !");
     let root = document
         .query_selector(&selector)?
         .expect("Failed to acquire root");

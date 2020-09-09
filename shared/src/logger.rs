@@ -15,7 +15,7 @@ use tracing_subscriber::fmt::{
     Layer as FormatLayer,
 };
 
-#[cfg(all(feature = "wasm", target_arch = "wasm32"))]
+#[cfg(all(feature = "wasm-bindgen", target_arch = "wasm32"))]
 use tracing_wasm::{
     WASMLayer,
     WASMLayerConfig,
@@ -48,7 +48,7 @@ impl Logger {
         Ok(())
     }
 
-    #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
+    #[cfg(all(feature = "wasm-bindgen", target_arch = "wasm32"))]
     fn install_panic_hook<RegistryType>(registry: RegistryType) -> Result<()>
     where
         RegistryType: Into<tracing::Dispatch>,
@@ -65,7 +65,7 @@ impl Logger {
         fmt::layer().with_writer(|| std::io::stderr())
     }
 
-    #[cfg(all(feature = "wasm", target_arch = "wasm32"))]
+    #[cfg(all(feature = "wasm-bindgen", target_arch = "wasm32"))]
     fn make_output_layer() -> WASMLayer {
         let config = WASMLayerConfig::default();
         WASMLayer::new(config)

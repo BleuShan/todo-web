@@ -5,8 +5,13 @@ name    = "todo-web-shared"
 version = "0.1.0"
 
 [features]
-actix = ["askama/with-actix-web", "actix-web", "askama_actix"]
-wasm  = ["console_error_panic_hook", "tracing-wasm", "chrono/wasmbind"]
+actix        = ["askama/with-actix-web", "actix-web", "askama_actix"]
+wasm-bindgen = [
+    "console_error_panic_hook",
+    "tracing-wasm",
+    "chrono/wasmbind",
+    "uuid/wasm-bindgen",
+]
 
 [dependencies]
 color-eyre         = "0.5"
@@ -43,3 +48,7 @@ tracing-subscriber = "0.2.11"
     [dependencies.tracing-wasm]
     optional = true
     version  = "0.1.0"
+
+    [dependencies.uuid]
+    features = ["v4", "serde"]
+    version  = "0.8"
