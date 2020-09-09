@@ -16,7 +16,7 @@ async function loadPkgJson() {
 }
 
 async function buildConfig() {
-  const {main: input} = await loadPkgJson()
+  const {main} = await loadPkgJson()
   const {TODO_WEB_ASSETS_DIR, TODO_WEB_WASM_BINDGEN_OUT_FILE} = process.env
   const plugins = [terser()]
   const wasmjsfile = TODO_WEB_WASM_BINDGEN_OUT_FILE.replace(
@@ -26,10 +26,10 @@ async function buildConfig() {
 
   return [
     {
-      input,
+      input: resolve(DIRNAME, 'src', main),
       external: (id) => EXTERNALS.some((pattern) => pattern.test(id)),
       output: {
-        file: resolve(TODO_WEB_ASSETS_DIR, input),
+        file: resolve(TODO_WEB_ASSETS_DIR, main),
         format: 'esm'
       },
       plugins: [

@@ -1,4 +1,4 @@
-import './stylesheets/main.scss'
+import '../stylesheets/main.scss'
 import init, {render} from './todo_web_client.js'
 
 async function main() {

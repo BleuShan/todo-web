@@ -9,9 +9,16 @@ use self::prelude::*;
 use actix_files as fs;
 use actix_web::{
     get,
-    http::ContentEncoding,
+    http::{
+        header::{
+            AcceptLanguage,
+            Header,
+        },
+        ContentEncoding,
+    },
     middleware,
     App,
+    HttpRequest,
     HttpServer,
 };
 use listenfd::ListenFd;
@@ -21,8 +28,14 @@ use todo_web_shared::{
 };
 
 #[get("/")]
-async fn index() -> Layout {
-    Layout::new(env!("CARGO_PKG_NAME").to_owned())
+#[instrument(skip(request))]
+async fn index(request: HttpRequest) -> WebResult<Layout> {
+    let lang = AcceptLanguage::parse(&request)?
+        .first()
+        .map(|tag| tag.clone().item.language)
+        .flatten()
+        .unwrap_or_else(|| "en".to_owned());
+    Ok(Layout::new(lang, env!("CARGO_PKG_NAME").to_owned()))
 }
 
 #[actix_rt::main]
