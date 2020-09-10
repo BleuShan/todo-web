@@ -2,11 +2,11 @@
 #![warn(missing_debug_implementations, nonstandard_style, rust_2018_idioms)]
 #![feature(format_args_capture)]
 
+mod assets;
 mod prelude;
 mod tls;
 
 use self::prelude::*;
-use actix_files as fs;
 use actix_web::{
     get,
     http::{
@@ -43,12 +43,11 @@ async fn main() -> Result<()> {
     let _logger = Logger::init()?;
     let config = tls::config().await?;
     let mut server = HttpServer::new(|| {
-        let assets = fs::Files::new("/", "./assets");
         App::new()
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::new(ContentEncoding::Auto))
             .service(index)
-            .service(assets)
+            .service(assets::assets)
     });
 
     let mut listenfd = ListenFd::from_env();

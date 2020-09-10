@@ -123,5 +123,4 @@ dist
 .pnp.*
 
 # output directories
-assets
-wasm
+server/assets

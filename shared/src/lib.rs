@@ -9,4 +9,5 @@ pub mod views;
 pub use askama;
 pub use chrono;
 pub use logger::Logger;
+pub use rust_embed;
 pub use uuid;
