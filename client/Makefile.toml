@@ -4,7 +4,8 @@ extend = "../Makefile.toml"
 "WASM_BINDGEN_WEAKREF"          = 1
 TODO_WEB_OUT_DIR                = "${CARGO_MAKE_CARGO_TARGET_DIR}/${CARGO_MAKE_CRATE_TARGET_TRIPLE}/${CARGO_MAKE_CARGO_BUILD_FLAVOR}"
 TODO_WEB_WASM_BINDGEN_FILE_NAME = "${CARGO_MAKE_CRATE_FS_NAME}_bg.wasm"
-TODO_WEB_WASM_BINDGEN_OUT_FILE  = "${TODO_WEB_ASSETS_DIR}/${TODO_WEB_WASM_BINDGEN_FILE_NAME}"
+TODO_WEB_WASM_BINDGEN_OUT_DIR   = "${CARGO_MAKE_WORKING_DIRECTORY}/wasm"
+TODO_WEB_WASM_BINDGEN_OUT_FILE  = "${TODO_WEB_WASM_BINDGEN_OUT_DIR}/${TODO_WEB_WASM_BINDGEN_FILE_NAME}"
 TODO_WEB_WASM_FILE_NAME         = "${CARGO_MAKE_CRATE_FS_NAME}.wasm"
 TODO_WEB_WASM_OUT_FILE          = "${TODO_WEB_OUT_DIR}/${TODO_WEB_WASM_FILE_NAME}"
 
@@ -14,7 +15,15 @@ category    = "Build"
 command     = "rm"
 description = "remove asset dir if needed"
         [tasks.clean-assets.condition]
-        files_exist = ["${TODO_WEB_WASM_BINDGEN_OUT_FILE}"]
+        files_exist = ["${TODO_WEB_ASSETS_DIR}/main.js"]
+
+[tasks.mkdir-assets]
+args        = ["${TODO_WEB_ASSETS_DIR}"]
+category    = "Build"
+command     = "mkdir"
+description = "create asset dir if needed"
+        [tasks.mkdir-assets.condition]
+        files_not_exist = ["${TODO_WEB_ASSETS_DIR}/main.js"]
 
 [tasks.post-clean]
 dependencies = ["clean-assets"]
@@ -23,13 +32,18 @@ dependencies = ["clean-assets"]
 dependencies = ["clean-assets"]
 
 [tasks.post-build]
-dependencies = ["wasm-bindgen", "wasm-opt", "rollup"]
+dependencies = ["wasm-bindgen", "mkdir-assets", "rollup", "wasm-opt", "imagemin"]
 
 [tasks.rollup]
 args        = ["rollup", "-c"]
 category    = "Build"
 command     = "yarn"
 description = "runs rollup"
+
+[tasks.imagemin]
+args        = ["imagemin", "assets/**/*", "-o", "${TODO_WEB_ASSETS_DIR}"]
+command     = "yarn"
+description = "runs imagemin"
 
 [tasks.install-wasm-bindgen]
 category      = "wasm"
@@ -39,7 +53,7 @@ install_crate = { crate_name = "wasm-bindgen", binary = "wasm-bindgen", test_arg
 [tasks.wasm-bindgen]
 args         = [
     "--out-dir",
-    "${TODO_WEB_ASSETS_DIR}",
+    "${TODO_WEB_WASM_BINDGEN_OUT_DIR}",
     "--target",
     "web",
     "--no-typescript",
@@ -56,7 +70,7 @@ args     = [
     "${TODO_WEB_WASM_BINDGEN_OUT_FILE}",
     "-Oz",
     "-o",
-    "${TODO_WEB_WASM_BINDGEN_OUT_FILE}",
+    "${TODO_WEB_ASSETS_DIR}/wasm/${TODO_WEB_WASM_BINDGEN_FILE_NAME}",
 ]
 category = "wasm"
 command  = "wasm-opt"

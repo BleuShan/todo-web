@@ -7,8 +7,6 @@ import postcssConfig from './postcss.config.mjs'
 import {terser} from 'rollup-plugin-terser'
 
 const DIRNAME = dirname(fileURLToPath(import.meta.url))
-const EXTERNALS = [/todo_web_client\.m?js/]
-const WASM_EXT_REGEX = /_bg\.wasm$/
 
 async function loadPkgJson() {
   const buffer = await fs.readFile(resolve(DIRNAME, 'package.json'))
@@ -17,19 +15,14 @@ async function loadPkgJson() {
 
 async function buildConfig() {
   const {main} = await loadPkgJson()
-  const {TODO_WEB_ASSETS_DIR, TODO_WEB_WASM_BINDGEN_OUT_FILE} = process.env
-  const plugins = [terser()]
-  const wasmjsfile = TODO_WEB_WASM_BINDGEN_OUT_FILE.replace(
-    WASM_EXT_REGEX,
-    '.js'
-  )
+  const {TODO_WEB_ASSETS_DIR} = process.env
 
   return [
     {
-      input: resolve(DIRNAME, 'src', main),
-      external: (id) => EXTERNALS.some((pattern) => pattern.test(id)),
+      input: main,
       output: {
-        file: resolve(TODO_WEB_ASSETS_DIR, main),
+        dir: TODO_WEB_ASSETS_DIR,
+        preserveModules: true,
         format: 'esm'
       },
       plugins: [
@@ -37,16 +30,8 @@ async function buildConfig() {
           extract: true,
           ...postcssConfig
         }),
-        ...plugins
+        terser()
       ]
-    },
-    {
-      input: wasmjsfile,
-      output: {
-        file: wasmjsfile,
-        format: 'esm'
-      },
-      plugins
     }
   ]
 }

@@ -4,39 +4,18 @@
 
 mod assets;
 mod prelude;
+mod routes;
 mod tls;
 
 use self::prelude::*;
 use actix_web::{
-    get,
-    http::{
-        header::{
-            AcceptLanguage,
-            Header,
-        },
-        ContentEncoding,
-    },
+    http::ContentEncoding,
     middleware,
     App,
-    HttpRequest,
     HttpServer,
 };
 use listenfd::ListenFd;
-use todo_web_shared::{
-    views::Layout,
-    Logger,
-};
-
-#[get("/")]
-#[instrument(skip(request))]
-async fn index(request: HttpRequest) -> WebResult<Layout> {
-    let lang = AcceptLanguage::parse(&request)?
-        .first()
-        .map(|tag| tag.clone().item.language)
-        .flatten()
-        .unwrap_or_else(|| "en".to_owned());
-    Ok(Layout::new(lang, env!("CARGO_PKG_NAME").to_owned()))
-}
+use todo_web_shared::Logger;
 
 #[actix_rt::main]
 async fn main() -> Result<()> {
@@ -46,8 +25,7 @@ async fn main() -> Result<()> {
         App::new()
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::new(ContentEncoding::Auto))
-            .service(index)
-            .service(assets::assets)
+            .configure(routes::root)
     });
 
     let mut listenfd = ListenFd::from_env();
