@@ -12,10 +12,10 @@ use std::{
 #[derive(Clap, Debug)]
 pub struct Socket {
     /// http server host
-    #[clap(short, long, env = "HOST", default_value = "localhost")]
+    #[clap(short, long, name = "HOST", env = "HOST", default_value = "localhost")]
     host: String,
     /// http server port
-    #[clap(short, long, env = "PORT", default_value = "3000")]
+    #[clap(short, long, name = "PORT", env = "PORT", default_value = "3000")]
     port: u16,
 }
 

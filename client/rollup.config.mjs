@@ -24,7 +24,7 @@ async function buildConfig() {
       dir: TODO_WEB_ASSETS_DIR,
       preserveModules: true,
       format: 'esm',
-      entryFileNames: '[name].mjs'
+      entryFileNames: '[name].[ext]'
     },
     plugins: [
       favicons.default({

@@ -1,11 +1,12 @@
 #![forbid(future_incompatible)]
 #![warn(missing_debug_implementations, nonstandard_style, rust_2018_idioms)]
-#![feature(format_args_capture)]
+#![feature(format_args_capture, trait_alias, box_patterns, box_syntax)]
 
-mod api;
 mod assets;
 mod configuration;
 mod prelude;
+mod routes;
+mod state;
 mod tls;
 
 use self::{
@@ -19,10 +20,11 @@ use actix_web::{
     HttpServer,
 };
 use listenfd::ListenFd;
+use state::AppState;
 use todo_web_shared::Logger;
 
-#[actix_web::main]
 #[instrument]
+#[actix_web::main]
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
     let _logger = Logger::new()
@@ -32,11 +34,13 @@ async fn main() -> Result<()> {
         .install()?;
     let config = Configuration::load();
 
-    let mut server = HttpServer::new(|| {
+    let mut server = HttpServer::new(move || {
         App::new()
+            .data_factory(AppState::load)
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::new(ContentEncoding::Auto))
-            .configure(api::routes)
+            .configure(routes::pages)
+            .configure(routes::files)
     });
 
     let mut listenfd = ListenFd::from_env();

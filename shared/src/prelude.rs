@@ -4,6 +4,7 @@ pub use color_eyre::{
         bail,
         ensure,
         eyre,
+        WrapErr,
     },
     Help,
     Report,
@@ -27,6 +28,12 @@ pub use derive_more::{
 };
 pub use once_cell;
 pub use rust_embed;
+pub use serde::{
+    self,
+    Deserialize,
+    Serialize,
+};
+pub use serde_json as Json;
 pub use std::{
     convert::{
         AsMut,
@@ -64,3 +71,6 @@ pub use tracing_error::prelude::*;
 pub use tracing_futures;
 pub use tracing_subscriber::prelude::*;
 pub use uuid;
+pub use v_htmlescape;
+
+pub trait SendSync = Send + Sync;

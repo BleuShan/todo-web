@@ -1,6 +1,6 @@
 #![forbid(future_incompatible)]
 #![warn(missing_debug_implementations, nonstandard_style, rust_2018_idioms)]
-#![feature(format_args_capture)]
+#![feature(format_args_capture, trait_alias, box_patterns, box_syntax)]
 
 mod prelude;
 
@@ -39,10 +39,11 @@ pub fn render(selector: &str) -> JSResult<()> {
         root.remove_child(child)?;
     }
 
-    let text = document.create_text_node("Hi!");
+    let text = document.create_text_node("Hello World!");
     let content = document.create_element("h1")?;
     content.append_child(&text)?;
     root.append_child(&content)?;
+    info!("Rendered");
 
     Ok(())
 }

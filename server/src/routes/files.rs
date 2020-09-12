@@ -2,20 +2,11 @@ use crate::assets::Assets;
 use actix_web::{
     body::Body,
     get,
-    web::{
-        self,
-        ServiceConfig,
-    },
-    HttpRequest,
+    web,
     HttpResponse,
     Responder,
 };
 use std::borrow::Cow;
-
-#[get("/")]
-async fn index(request: HttpRequest) -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
 
 #[get("/{path:.+}")]
 pub async fn assets(url: web::Path<(String,)>) -> impl Responder {
@@ -36,8 +27,4 @@ pub async fn assets(url: web::Path<(String,)>) -> impl Responder {
         }
         None => HttpResponse::NotFound().body("404 Not Found"),
     }
-}
-
-pub fn routes(config: &mut ServiceConfig) {
-    config.service(index).service(assets);
 }
