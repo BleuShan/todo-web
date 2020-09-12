@@ -125,3 +125,4 @@ dist
 # output directories
 server/assets
 wasm
+certs

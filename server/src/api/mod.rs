@@ -1,36 +1,24 @@
-use crate::{
-    assets::Assets,
-    prelude::*,
-};
+use crate::assets::Assets;
 use actix_web::{
     body::Body,
     get,
-    http::header::{
-        AcceptLanguage,
-        Header,
-    },
     web::{
         self,
         ServiceConfig,
     },
     HttpRequest,
     HttpResponse,
+    Responder,
 };
 use std::borrow::Cow;
-use todo_web_shared::views::Layout;
 
 #[get("/")]
-async fn index(request: HttpRequest) -> WebResult<Layout> {
-    let lang = AcceptLanguage::parse(&request)?
-        .first()
-        .map(|tag| tag.clone().item.language)
-        .flatten()
-        .unwrap_or_else(|| "en".to_owned());
-    Ok(Layout::new(lang, env!("CARGO_PKG_NAME").to_owned()))
+async fn index(request: HttpRequest) -> impl Responder {
+    HttpResponse::Ok().body("Hello world!")
 }
 
 #[get("/{path:.+}")]
-pub async fn assets(url: web::Path<(String,)>) -> HttpResponse {
+pub async fn assets(url: web::Path<(String,)>) -> impl Responder {
     let (path,) = url.into_inner();
     match Assets::get(&path) {
         Some(content) => {
@@ -50,6 +38,6 @@ pub async fn assets(url: web::Path<(String,)>) -> HttpResponse {
     }
 }
 
-pub fn root(config: &mut ServiceConfig) {
+pub fn routes(config: &mut ServiceConfig) {
     config.service(index).service(assets);
 }

@@ -6,14 +6,9 @@ use async_std::{
     io::BufReader,
     path::Path,
 };
-use rustls::{
-    Certificate,
-    NoClientAuth,
-    PrivateKey,
-    ServerConfig,
-};
+pub use rustls::*;
 
-async fn load_tls_certs<PathRef>(path: PathRef) -> Result<Vec<Certificate>>
+pub async fn load_certs<PathRef>(path: PathRef) -> Result<Vec<Certificate>>
 where
     PathRef: AsRef<Path>,
 {
@@ -21,7 +16,7 @@ where
     pemfile::certs(cert_file).await
 }
 
-async fn load_tls_key<PathRef>(path: PathRef) -> Result<PrivateKey>
+pub async fn load_key<PathRef>(path: PathRef) -> Result<PrivateKey>
 where
     PathRef: AsRef<Path>,
 {
@@ -50,14 +45,4 @@ where
     } else {
         Err(eyre!("No key found"))
     }
-}
-
-pub async fn config() -> Result<ServerConfig> {
-    let mut config = ServerConfig::new(NoClientAuth::new());
-    config.set_single_cert(
-        load_tls_certs("localhost.pem").await?,
-        load_tls_key("localhost-key.pem").await?,
-    )?;
-
-    Ok(config)
 }

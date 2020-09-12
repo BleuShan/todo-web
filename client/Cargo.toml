@@ -14,7 +14,7 @@ wasm-bindgen-futures = "0.4.18"
 wee_alloc            = "0.4.5"
 
     [dependencies.serde]
-    features = ["derive"]
+    features = ["derive", "alloc"]
     version  = "1.0.115"
 
     [dependencies.todo-web-shared]

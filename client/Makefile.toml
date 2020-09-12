@@ -15,15 +15,7 @@ category    = "Build"
 command     = "rm"
 description = "remove asset dir if needed"
         [tasks.clean-assets.condition]
-        files_exist = ["${TODO_WEB_ASSETS_DIR}/main.js"]
-
-[tasks.mkdir-assets]
-args        = ["${TODO_WEB_ASSETS_DIR}"]
-category    = "Build"
-command     = "mkdir"
-description = "create asset dir if needed"
-        [tasks.mkdir-assets.condition]
-        files_not_exist = ["${TODO_WEB_ASSETS_DIR}/main.js"]
+        files_exist = ["${TODO_WEB_ASSETS_DIR}/manifest.json"]
 
 [tasks.post-clean]
 dependencies = ["clean-assets"]
@@ -32,18 +24,20 @@ dependencies = ["clean-assets"]
 dependencies = ["clean-assets"]
 
 [tasks.post-build]
-dependencies = ["wasm-bindgen", "mkdir-assets", "rollup", "wasm-opt", "imagemin"]
+alias = "build-assets"
 
-[tasks.rollup]
-args        = ["rollup", "-c"]
+[tasks.build-assets]
+dependencies = ["build"]
+description  = "creates the server assets bundle"
+
+        [tasks.build-assets.run_task]
+        name = ["wasm-bindgen", "bundle", "wasm-opt"]
+
+[tasks.bundle]
+args        = ["rollup", "-c", "rollup.config.mjs"]
 category    = "Build"
 command     = "yarn"
 description = "runs rollup"
-
-[tasks.imagemin]
-args        = ["imagemin", "assets/**/*", "-o", "${TODO_WEB_ASSETS_DIR}"]
-command     = "yarn"
-description = "runs imagemin"
 
 [tasks.install-wasm-bindgen]
 category      = "wasm"

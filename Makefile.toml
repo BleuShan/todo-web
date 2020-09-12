@@ -42,9 +42,11 @@ category    = "cleanup"
 description = "post clean hook"
 
 [tasks.clean-flow]
-category     = "cleanup"
-dependencies = ["pre-clean", "clean", "post-clean"]
-description  = "Run the associated tasks to cleanup everything"
+category    = "cleanup"
+description = "Run the associated tasks to cleanup everything"
+
+        [tasks.clean-flow.run-task]
+
 
 [tasks.pre-build]
 category    = "Build"
