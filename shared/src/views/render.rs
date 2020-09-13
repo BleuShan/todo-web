@@ -24,13 +24,17 @@ struct RendererState<'state> {
 }
 
 impl<'state> RendererState<'state> {
+    #[instrument]
     fn new() -> Result<Self> {
+        info!("Initializing template registry.");
         let mut registry = Handlebars::new();
 
         registry.register_escape_fn(|s| v_htmlescape::escape(s).to_string());
+        info!("Registering templates");
         for ref filename in TemplateSourceFiles::iter() {
             let mut file = TemplateSourceFile::open(filename)?;
             registry.register_template_source(filename, &mut file)?;
+            debug!(r#"registred: "{}""#, filename);
         }
 
         Ok(Self {
@@ -78,9 +82,11 @@ impl Clone for Renderer {
 }
 
 impl Renderer {
-    pub fn new() -> Result<Self> {
+    #[instrument]
+    pub fn current() -> Result<Self> {
         CURRENT_RENDERER_STATE
             .get_or_try_init(|| {
+                info!("initializing global view renderer");
                 let state: RendererState<'static> = RendererState::new()?;
                 Ok(Arc::from(state))
             })

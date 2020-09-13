@@ -9,7 +9,7 @@ pub struct AppState {
 impl AppState {
     #[instrument]
     pub async fn load() -> Result<Self> {
-        let renderer = Renderer::new()?;
+        let renderer = Renderer::current()?;
         let state = Self { renderer };
         Ok(state)
     }

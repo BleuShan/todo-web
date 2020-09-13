@@ -19,7 +19,7 @@ pub struct Configuration {
 }
 
 impl Configuration {
-    pub fn load() -> &'static Self {
+    pub fn current() -> &'static Self {
         &CURRENT_CONFIG
     }
 

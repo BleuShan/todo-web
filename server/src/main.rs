@@ -32,7 +32,7 @@ async fn main() -> Result<()> {
         .with_default_error_layer()?
         .with_default_output()?
         .install()?;
-    let config = Configuration::load();
+    let config = Configuration::current();
 
     let mut server = HttpServer::new(move || {
         App::new()
