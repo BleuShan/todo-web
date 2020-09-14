@@ -20,11 +20,9 @@ use parking_lot::{
     RwLock,
     RwLockReadGuard,
 };
-use todo_web_shared::views::Renderer;
 
 #[derive(Debug)]
 struct Inner {
-    renderer: Renderer,
     database: PgPool,
 }
 
@@ -34,16 +32,15 @@ pub struct AppData(Arc<RwLock<Inner>>);
 impl AppData {
     #[instrument(err, skip(config))]
     pub async fn load(config: &Configuration) -> Result<Self> {
-        let renderer = Renderer::new()?;
         let database: PgPool = config.database().into();
         info!("updating database");
         MIGRATOR.run(&database).await?;
 
-        Ok(Inner { renderer, database }.into())
+        Ok(Inner { database }.into())
     }
 
-    pub fn renderer(&self) -> MappedRwLockReadGuard<'_, Renderer> {
-        RwLockReadGuard::map(self.0.read(), |data| &data.renderer)
+    pub fn database(&self) -> MappedRwLockReadGuard<'_, PgPool> {
+        RwLockReadGuard::map(self.0.read(), |data| &data.database)
     }
 }
 

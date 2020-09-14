@@ -25,8 +25,6 @@ pub fn start() -> JSResult<()> {
         .map_err(|_| "Failed to initialize logger")?
         .with_default_error_layer()
         .map_err(|_| "Failed to initialize logger")?
-        .with_default_output()
-        .map_err(|_| "Failed to initialize logger")?
         .install()
         .expect_throw("Failed to install logger");
 

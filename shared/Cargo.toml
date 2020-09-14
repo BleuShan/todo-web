@@ -5,7 +5,7 @@ name    = "todo-web-shared"
 version = "0.1.0"
 
 [features]
-actix        = ["actix-web", "tracing-appender"]
+actix        = ["actix-web", "tracing-appender", "askama/with-actix-web", "askama_actix"]
 wasm-bindgen = [
     "console_error_panic_hook",
     "tracing-wasm",
@@ -16,7 +16,6 @@ wasm-bindgen = [
 [dependencies]
 bytes              = "0.5.6"
 color-eyre         = "0.5"
-handlebars         = "3.4.0"
 once_cell          = "1.4.1"
 serde_derive       = "1.0.116"
 serde_json         = "1.0.57"
@@ -24,11 +23,18 @@ tracing            = "0.1.19"
 tracing-error      = "0.1.2"
 tracing-futures    = "0.2.4"
 tracing-subscriber = "0.2.12"
-v_htmlescape       = "0.10.0"
 
     [dependencies.actix-web]
     optional = true
     version  = "3.0.1"
+
+    [dependencies.askama]
+    features = ["serde-json"]
+    version  = "0.10.3"
+
+    [dependencies.askama_actix]
+    optional = true
+    version  = "0.11.0"
 
     [dependencies.console_error_panic_hook]
     optional = true

@@ -82,6 +82,5 @@ pub use tracing_error::prelude::*;
 pub use tracing_futures;
 pub use tracing_subscriber::prelude::*;
 pub use uuid;
-pub use v_htmlescape;
 
 pub trait SendSync = Send + Sync;
