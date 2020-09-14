@@ -10,7 +10,7 @@ use std::{
 
 /// Network Socket configuration
 #[derive(Clap, Debug)]
-pub struct Socket {
+pub struct SocketConfiguration {
     /// http server host
     #[clap(short, long, name = "HOST", env = "HOST", default_value = "localhost")]
     host: String,
@@ -19,7 +19,7 @@ pub struct Socket {
     port: u16,
 }
 
-impl ToSocketAddrs for &Socket {
+impl ToSocketAddrs for &SocketConfiguration {
     type Iter = IntoIter<SocketAddr>;
 
     fn to_socket_addrs(&self) -> std::io::Result<Self::Iter> {

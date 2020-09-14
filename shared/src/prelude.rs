@@ -26,7 +26,17 @@ pub use derive_more::{
     IntoIterator,
     TryInto,
 };
+pub use futures::{
+    self,
+    future::{
+        BoxFuture,
+        LocalBoxFuture,
+    },
+    prelude::*,
+};
+
 pub use once_cell;
+pub use parking_lot;
 pub use rust_embed;
 pub use serde::{
     self,
@@ -40,6 +50,7 @@ pub use std::{
         AsRef,
         TryFrom,
     },
+    error::Error as StdError,
     fmt::{
         self,
         Debug,

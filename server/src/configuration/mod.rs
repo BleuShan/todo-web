@@ -1,33 +1,38 @@
+mod database;
 mod socket;
 mod tls;
 
 use crate::prelude::*;
 use clap::Clap;
-use once_cell::sync::Lazy;
-pub use socket::Socket;
-pub use tls::Tls;
-
-static CURRENT_CONFIG: Lazy<Configuration> = Lazy::new(|| Configuration::parse());
+pub use database::DatabaseConfiguration;
+pub use socket::SocketConfiguration;
+pub use tls::TLSConfiguration;
 
 #[derive(Clap, Debug)]
 #[clap(author, about, version)]
 pub struct Configuration {
     #[clap(flatten)]
-    socket: Socket,
+    database: DatabaseConfiguration,
     #[clap(flatten)]
-    tls: Tls,
+    socket: SocketConfiguration,
+    #[clap(flatten)]
+    tls: TLSConfiguration,
 }
 
 impl Configuration {
-    pub fn current() -> &'static Self {
-        &CURRENT_CONFIG
+    pub fn load() -> Self {
+        Self::parse()
     }
 
-    pub fn socket(&self) -> &Socket {
+    pub fn database(&self) -> &DatabaseConfiguration {
+        &self.database
+    }
+
+    pub fn socket(&self) -> &SocketConfiguration {
         &self.socket
     }
 
-    pub fn tls(&self) -> &Tls {
+    pub fn tls(&self) -> &TLSConfiguration {
         &self.tls
     }
 }

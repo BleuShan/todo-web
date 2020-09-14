@@ -1,5 +1,8 @@
 use crate::prelude::*;
-use async_std::io::BufRead;
+use async_std::io::{
+    self,
+    BufRead,
+};
 use base64;
 use rustls::{
     Certificate,
@@ -14,7 +17,7 @@ async fn extract<'a, A, F, R>(
     start_mark: &str,
     end_mark: &str,
     f: F,
-) -> Result<Vec<A>>
+) -> io::Result<Vec<A>>
 where
     F: Fn(Vec<u8>) -> A,
     R: BufRead + 'a,
@@ -40,7 +43,8 @@ where
 
         if line.starts_with(end_mark) {
             take_base64 = false;
-            let der = base64::decode(&b64buf)?;
+            let der = base64::decode(&b64buf)
+                .map_err(|e| io::Error::new(io::ErrorKind::InvalidInput, e))?;
             ders.push(f(der));
             b64buf = String::new();
             continue;
@@ -54,7 +58,7 @@ where
 
 /// Extract all the certificates from rd, and return a vec of `key::Certificate`s
 /// containing the der-format contents.
-pub async fn certs<'a, R>(rd: Pin<Box<R>>) -> Result<Vec<Certificate>>
+pub async fn certs<'a, R>(rd: Pin<Box<R>>) -> io::Result<Vec<Certificate>>
 where
     R: BufRead + 'a,
 {
@@ -69,7 +73,7 @@ where
 
 /// Extract all RSA private keys from rd, and return a vec of `key::PrivateKey`s
 /// containing the der-format contents.
-pub async fn rsa_private_keys<'a, R>(rd: Pin<Box<R>>) -> Result<Vec<PrivateKey>>
+pub async fn rsa_private_keys<'a, R>(rd: Pin<Box<R>>) -> io::Result<Vec<PrivateKey>>
 where
     R: BufRead + 'a,
 {
@@ -84,7 +88,7 @@ where
 
 /// Extract all PKCS8-encoded private keys from rd, and return a vec of
 /// `key::PrivateKey`s containing the der-format contents.
-pub async fn pkcs8_private_keys<'a, R>(rd: Pin<Box<R>>) -> Result<Vec<PrivateKey>>
+pub async fn pkcs8_private_keys<'a, R>(rd: Pin<Box<R>>) -> io::Result<Vec<PrivateKey>>
 where
     R: BufRead + 'a,
 {

@@ -12,6 +12,10 @@ js-sys               = "0.3.45"
 wasm-bindgen-futures = "0.4.18"
 wee_alloc            = "0.4.5"
 
+    [dependencies.serde]
+    features = ["derive", "alloc"]
+    version  = "1.0.116"
+
     [dependencies.todo-web-shared]
     features = ["wasm-bindgen"]
     path     = "../shared"
