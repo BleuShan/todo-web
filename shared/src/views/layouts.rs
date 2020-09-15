@@ -2,7 +2,7 @@ use super::prelude::*;
 use crate::prelude::*;
 
 #[derive(Debug, Template)]
-#[template(path = "layouts/page.jinja")]
+#[template(path = "layouts/page.html")]
 pub struct Page {
     title: String,
     lang: String,
