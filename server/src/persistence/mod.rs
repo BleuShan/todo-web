@@ -9,6 +9,7 @@ pub use sqlx::{
     postgres::{
         self,
         PgConnectOptions,
+        Postgres,
     },
     prelude,
     query,

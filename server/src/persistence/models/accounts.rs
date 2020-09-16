@@ -3,6 +3,7 @@ use crate::{
         prelude::*,
         query_as,
         PgPool,
+        Postgres,
         SQLResult,
     },
     prelude::*,
@@ -24,13 +25,20 @@ pub struct Account {
 }
 
 impl Account {
-    pub async fn new(pool: &PgPool, handle: String) -> SQLResult<Self> {
+    pub async fn new<'c, ExecutorType, HandleType>(
+        executor: ExecutorType,
+        handle: HandleType,
+    ) -> SQLResult<Self>
+    where
+        ExecutorType: Executor<'c, Database = Postgres>,
+        String: From<HandleType>,
+    {
         query_as!(
             Account,
             r#"INSERT INTO accounts (handle) VALUES ($1) RETURNING *"#,
-            handle
+            String::from(handle)
         )
-        .fetch_one(pool)
+        .fetch_one(executor)
         .await
     }
 }
@@ -56,7 +64,31 @@ pub struct AccountPassword {
 #[cfg(test)]
 mod test {
     use super::*;
+    use once_cell::sync::OnceCell;
+    use std::env;
+
+    static CURRENT_POOL: OnceCell<PgPool> = OnceCell::new();
+
+    fn test_pool<'a>() -> Result<&'a PgPool> {
+        CURRENT_POOL.get_or_try_init(|| {
+            dotenv::dotenv().ok();
+            PgPool::connect_lazy(env::var("DATABASE_TEST_URL")?.as_str()).map_err(|e| e.into())
+        })
+    }
 
     #[actix_web::rt::test]
-    async fn test() {}
+    async fn new_account() {
+        let pool = test_pool().expect("Couldn't instantiate test pool");
+        let mut transaction = pool.begin().await.expect("Fail to begin transaction");
+        let account = Account::new(&mut transaction, "handle")
+            .await
+            .expect("Account");
+
+        assert_eq!(account.handle, "handle");
+
+        transaction
+            .rollback()
+            .await
+            .expect("Failed to cleanup test")
+    }
 }
