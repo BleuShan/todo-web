@@ -1,4 +1,3 @@
-#![forbid(future_incompatible)]
 #![warn(missing_debug_implementations, nonstandard_style, rust_2018_idioms)]
 #![feature(
     format_args_capture,
@@ -9,10 +8,9 @@
     type_alias_impl_trait
 )]
 
-mod app;
 mod assets;
 mod configuration;
-mod http;
+mod extractors;
 mod persistence;
 mod prelude;
 mod routes;
@@ -20,6 +18,7 @@ mod tls;
 
 use self::{
     configuration::Configuration,
+    persistence::Store,
     prelude::*,
 };
 use actix_web::{
@@ -28,7 +27,7 @@ use actix_web::{
     App,
     HttpServer,
 };
-use app::AppData;
+
 use async_std::io;
 use listenfd::ListenFd;
 use todo_web_shared::Logger;
@@ -43,11 +42,10 @@ async fn main() -> Result<()> {
         .with_default_error_layer()?
         .install()?;
     let config = Configuration::load();
-    let app_data = AppData::load(&config).await?;
 
     let mut server = HttpServer::new(move || {
         App::new()
-            .app_data(app_data.clone())
+            .data(Store::from_registry())
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::new(ContentEncoding::Auto))
             .configure(routes::pages)
@@ -72,7 +70,7 @@ async fn main() -> Result<()> {
                 server.bind(config.socket())?
             }
         }
-        Err(e) => return Err(e.into()),
+        Err(error) => return Err(error.into()),
     };
 
     server.run().await?;

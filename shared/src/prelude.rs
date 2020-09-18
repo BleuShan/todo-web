@@ -35,6 +35,7 @@ pub use futures::{
     prelude::*,
 };
 
+pub use bytes;
 pub use once_cell;
 pub use parking_lot;
 pub use rust_embed;
@@ -79,7 +80,11 @@ pub use tracing::{
     warn_span,
 };
 pub use tracing_error::prelude::*;
-pub use tracing_futures;
+pub use tracing_futures::{
+    self,
+    Instrument,
+    WithSubscriber,
+};
 pub use tracing_subscriber::prelude::*;
 pub use uuid;
 

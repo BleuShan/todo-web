@@ -1,11 +1,9 @@
-use crate::{
-    persistence::postgres::{
-        PgConnectOptions,
-        PgPool,
-    },
-    prelude::*,
-};
+use crate::prelude::*;
 use clap::Clap;
+use sqlx::postgres::{
+    PgConnectOptions,
+    PgPool,
+};
 
 /// Database Connection configuration
 #[derive(Clap, Debug)]

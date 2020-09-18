@@ -1,13 +1,12 @@
 use crate::prelude::*;
-pub use actix_web::http::*;
 use actix_web::{
     error::ParseError,
+    http::header::Header,
     FromRequest,
     HttpRequest,
 };
 use async_std::sync::Arc;
 use future::Ready;
-use header::Header;
 
 #[derive(Debug)]
 #[repr(transparent)]

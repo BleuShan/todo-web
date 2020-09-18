@@ -1,13 +1,10 @@
 use crate::{
-    http::{
-        header::AcceptLanguage,
-        RequestHeader,
-    },
+    extractors::RequestHeader,
     prelude::*,
-    AppData,
 };
 use actix_web::{
     get,
+    http::header::AcceptLanguage,
     Responder,
 };
 use todo_web_shared::views::layouts::Page;
