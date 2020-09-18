@@ -21,12 +21,11 @@ serde_derive       = "1.0.116"
 serde_json         = "1.0.57"
 tracing            = "0.1.19"
 tracing-error      = "0.1.2"
-tracing-futures    = "0.2.4"
 tracing-subscriber = "0.2.12"
 
     [dependencies.actix-web]
     optional = true
-    version  = "3.0.1"
+    version  = "3.0.2"
 
     [dependencies.askama]
     features = ["serde-json"]
@@ -67,6 +66,10 @@ tracing-subscriber = "0.2.12"
     [dependencies.tracing-appender]
     optional = true
     version  = "0.1.1"
+
+    [dependencies.tracing-futures]
+    features = ["futures-03"]
+    version  = "0.2.4"
 
     [dependencies.tracing-wasm]
     optional = true

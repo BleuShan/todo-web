@@ -2,7 +2,7 @@
   "name": "todo-web-client",
   "version": "0.1.0",
   "type": "module",
-  "main": "main.mjs",
+  "main": "main.js",
   "license": "MIT",
   "devDependencies": {
     "cssnano": "^4.1.10",
