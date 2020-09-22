@@ -32,8 +32,8 @@ pub use futures::{
         BoxFuture,
         LocalBoxFuture,
     },
-    prelude::*,
 };
+pub use std::pin::Pin;
 
 pub use bytes;
 pub use once_cell;
@@ -89,3 +89,4 @@ pub use tracing_subscriber::prelude::*;
 pub use uuid;
 
 pub trait SendSync = Send + Sync;
+pub type PinBox<T> = Pin<Box<T>>;

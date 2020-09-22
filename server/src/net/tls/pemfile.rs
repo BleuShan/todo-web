@@ -1,12 +1,13 @@
 use crate::prelude::*;
-use async_std::io::{
-    self,
-    BufRead,
-};
 use base64;
 use rustls::{
     Certificate,
     PrivateKey,
+};
+use tokio::io::{
+    self,
+    AsyncBufRead,
+    AsyncBufReadExt,
 };
 
 /// Extract and decode all PEM sections from `rd`, which begin with `start_mark`
@@ -20,7 +21,7 @@ async fn extract<'a, A, F, R>(
 ) -> io::Result<Vec<A>>
 where
     F: Fn(Vec<u8>) -> A,
-    R: BufRead + 'a,
+    R: AsyncBufRead + 'a,
 {
     let mut ders = Vec::new();
     let mut b64buf = String::new();
@@ -60,7 +61,7 @@ where
 /// containing the der-format contents.
 pub async fn certs<'a, R>(rd: Pin<Box<R>>) -> io::Result<Vec<Certificate>>
 where
-    R: BufRead + 'a,
+    R: AsyncBufRead + 'a,
 {
     extract(
         rd,
@@ -75,7 +76,7 @@ where
 /// containing the der-format contents.
 pub async fn rsa_private_keys<'a, R>(rd: Pin<Box<R>>) -> io::Result<Vec<PrivateKey>>
 where
-    R: BufRead + 'a,
+    R: AsyncBufRead + 'a,
 {
     extract(
         rd,
@@ -90,7 +91,7 @@ where
 /// `key::PrivateKey`s containing the der-format contents.
 pub async fn pkcs8_private_keys<'a, R>(rd: Pin<Box<R>>) -> io::Result<Vec<PrivateKey>>
 where
-    R: BufRead + 'a,
+    R: AsyncBufRead + 'a,
 {
     extract(
         rd,

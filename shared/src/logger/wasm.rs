@@ -1,8 +1,4 @@
 use super::*;
-pub use tracing_wasm::{
-    WASMLayer,
-    WASMLayerConfig,
-};
 
 impl<SubscriberType> LoggerConfig<SubscriberType>
 where

@@ -7,7 +7,6 @@ pub use sqlx::{
     postgres::{
         self,
         PgConnectOptions,
-        Postgres,
     },
     prelude::*,
     query,
@@ -17,3 +16,9 @@ pub use sqlx::{
     FromRow,
     PgPool,
 };
+use sqlx::{
+    pool::PoolConnection,
+    postgres::Postgres,
+};
+
+pub type PgPoolConnection = PoolConnection<Postgres>;

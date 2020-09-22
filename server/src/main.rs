@@ -5,35 +5,29 @@
     trait_alias,
     box_patterns,
     box_syntax,
-    type_alias_impl_trait
+    type_alias_impl_trait,
+    try_blocks
 )]
 
 mod assets;
 mod configuration;
-mod extractors;
+mod net;
 mod persistence;
 mod prelude;
-mod routes;
-mod tls;
 
 use self::{
     configuration::Configuration,
-    persistence::Store,
+    net::{
+        connection::ConnectionHandler,
+        tcp,
+    },
     prelude::*,
 };
-use actix_web::{
-    http::ContentEncoding,
-    middleware,
-    App,
-    HttpServer,
-};
-
-use async_std::io;
-use listenfd::ListenFd;
 use todo_web_shared::Logger;
+use tokio::signal;
 
-#[instrument]
-#[actix_web::main]
+#[tokio::main]
+#[instrument(err)]
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
     let _logger = Logger::new()
@@ -41,38 +35,42 @@ async fn main() -> Result<()> {
         .with_default_output()?
         .with_default_error_layer()?
         .install()?;
-    let config = Configuration::load();
+    info!("Starting server.");
 
-    let mut server = HttpServer::new(move || {
-        App::new()
-            .data(Store::from_registry())
-            .wrap(middleware::Logger::default())
-            .wrap(middleware::Compress::new(ContentEncoding::Auto))
-            .configure(routes::pages)
-            .configure(routes::files)
-    });
+    let config = Configuration::current();
+    let handler = match config.tls().load_server_config().await {
+        Ok(tls) => ConnectionHandler::new().with_tls(tls),
+        Err(_) => {
+            warn!("TLS disabled.");
+            ConnectionHandler::new()
+        }
+    }
+    .build();
 
-    info!("Starting http server.");
-    let mut listenfd = ListenFd::from_env();
-    server = match config.tls().load_server_config().await {
-        Ok(configuration) => {
-            if let Some(listener) = listenfd.take_tcp_listener(0)? {
-                server.listen_rustls(listener, configuration)?
-            } else {
-                server.bind_rustls(config.socket(), configuration)?
+    let mut listener = tcp::bind_listener(config.socket().as_tuple()).await?;
+    loop {
+        let next = listener.next();
+        select! {
+            maybe_result = next => {
+                match maybe_result {
+                    Some(Ok(stream)) => {
+                        handler.handle_connection(stream)
+                    }
+                    Some(Err(error)) => {
+                        error!("{}", error);
+                    }
+                    None  => {
+                        info!("TcpListener terminated. Exiting.");
+                        break;
+                    }
+                }
+            }
+            Ok(()) = signal::ctrl_c() => {
+                info!("Exit signal received. Exiting.");
+                break;
             }
         }
-        Err(error) if error.kind() == io::ErrorKind::NotFound => {
-            warn!("No TLS configuration loaded https will be unavailable.");
-            if let Some(listener) = listenfd.take_tcp_listener(0)? {
-                server.listen(listener)?
-            } else {
-                server.bind(config.socket())?
-            }
-        }
-        Err(error) => return Err(error.into()),
-    };
+    }
 
-    server.run().await?;
     Ok(())
 }

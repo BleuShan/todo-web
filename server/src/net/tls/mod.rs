@@ -1,15 +1,22 @@
 mod pemfile;
+pub mod server;
+
+pub use rustls::*;
+pub use tokio_rustls::{
+    TlsAcceptor,
+    TlsConnector,
+    TlsStream,
+};
 
 use crate::prelude::*;
-use async_std::{
+use std::path::Path;
+use tokio::{
     fs::File,
     io::{
         self,
         BufReader,
     },
-    path::Path,
 };
-pub use rustls::*;
 
 pub async fn load_certs<PathRef>(path: PathRef) -> io::Result<Vec<Certificate>>
 where
@@ -45,7 +52,7 @@ where
         })
     };
 
-    let (rsa_key, pkcs8_key) = future::join(rsa_keys, pkcs8_keys).await;
+    let (rsa_key, pkcs8_key) = join!(rsa_keys, pkcs8_keys);
 
     if let Ok(key) = pkcs8_key {
         Ok(key.clone())

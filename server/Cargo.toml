@@ -1,33 +1,23 @@
 [package]
-authors = ["Philippe Lafontaine <lafontaine.philippe@gmail.com>"]
-edition = "2018"
-name    = "todo-web"
-version = "0.1.0"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors     = ["Philippe Lafontaine <lafontaine.philippe@gmail.com>"]
+description = "An overengineered TODO list experiment in rust."
+edition     = "2018"
+name        = "todo-web"
+version     = "0.1.0"
 
 [dependencies]
-actix            = "0.10"
-actix-web-actors = "3.0.0"
-base64           = "0.12.3"
-dotenv           = "0.15.0"
-listenfd         = "0.3"
-mime_guess       = "2.0.3"
-pin-project      = "0.4.23"
-rustls           = "0.18.1"
-serde_json       = "1.0.57"
-
-    [dependencies.actix-web]
-    features = ["rustls"]
-    version  = "3.0.2"
-
-    [dependencies.async-std]
-    features = ["unstable"]
-    version  = "1.6.4"
+base64       = "0.12.3"
+dotenv       = "0.15.0"
+listenfd     = "0.3"
+mime_guess   = "2.0.3"
+pin-project  = "0.4.23"
+rustls       = "0.18.1"
+serde_json   = "1.0.57"
+tokio-rustls = "0.14.1"
 
     [dependencies.clap]
     features = ["unstable", "wrap_help"]
-    version  = "3.0.0-beta.1"
+    version  = "3.0.0-beta.2"
 
     [dependencies.serde]
     features = ["derive", "alloc"]
@@ -41,11 +31,15 @@ serde_json       = "1.0.57"
         "postgres",
         "chrono",
         "uuid",
-        "runtime-actix",
+        "runtime-tokio",
         "offline",
     ]
     version          = "0.4.0-beta.1"
 
     [dependencies.todo-web-shared]
-    features = ["actix"]
+    features = ["server"]
     path     = "../shared"
+
+    [dependencies.tokio]
+    features = ["full", "parking_lot"]
+    version  = "0.2.22"

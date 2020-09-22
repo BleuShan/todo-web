@@ -3,8 +3,3 @@ pub use askama::{
     SizedTemplate,
     Template,
 };
-#[cfg(feature = "actix")]
-pub use askama_actix::{
-    self,
-    TemplateIntoResponse,
-};

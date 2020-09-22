@@ -6,8 +6,12 @@
     trait_alias,
     box_patterns,
     box_syntax,
-    type_alias_impl_trait
+    type_alias_impl_trait,
+    try_blocks
 )]
+#[macro_use]
+#[doc(hidden)]
+pub mod macros;
 
 mod logger;
 pub mod prelude;

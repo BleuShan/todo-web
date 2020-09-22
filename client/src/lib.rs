@@ -6,7 +6,8 @@
     trait_alias,
     box_patterns,
     box_syntax,
-    type_alias_impl_trait
+    type_alias_impl_trait,
+    try_blocks
 )]
 
 mod prelude;

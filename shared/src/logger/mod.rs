@@ -5,8 +5,7 @@ use tracing::{
     Dispatch,
     Subscriber,
 };
-#[cfg(feature = "tracing-appender")]
-use tracing_appender::non_blocking::WorkerGuard;
+
 use tracing_error::ErrorLayer;
 use tracing_subscriber::{
     layer::Layered,
@@ -15,13 +14,19 @@ use tracing_subscriber::{
     Layer,
     Registry,
 };
-
-#[cfg(not(target_arch = "wasm32"))]
-mod native;
-#[cfg(all(feature = "wasm-bindgen", target_arch = "wasm32"))]
-mod wasm;
-#[cfg(all(feature = "wasm-bindgen", target_arch = "wasm32"))]
-pub use self::wasm::*;
+cfg_tracing_appender! {
+    use tracing_appender::non_blocking::WorkerGuard;
+}
+cfg_native! {
+    mod native;
+}
+cfg_wasm! {
+    mod wasm;
+    pub use tracing_wasm::{
+        WASMLayer,
+        WASMLayerConfig,
+    };
+}
 
 pub struct LoggerConfig<SubscriberType = Registry>
 where
@@ -33,12 +38,6 @@ where
     guard: OnceCell<WorkerGuard>,
 }
 
-impl Debug for LoggerConfig {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct(std::any::type_name::<Self>()).finish()
-    }
-}
-
 impl Default for LoggerConfig {
     fn default() -> Self {
         Self {
@@ -46,6 +45,12 @@ impl Default for LoggerConfig {
             #[cfg(feature = "tracing-appender")]
             guard: OnceCell::new(),
         }
+    }
+}
+
+impl Debug for LoggerConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct(std::any::type_name::<Self>()).finish()
     }
 }
 
