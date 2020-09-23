@@ -8,6 +8,7 @@
     type_alias_impl_trait,
     try_blocks
 )]
+#![type_length_limit = "3314704"]
 
 mod assets;
 mod configuration;
@@ -24,9 +25,8 @@ use self::{
     prelude::*,
 };
 use todo_web_shared::Logger;
-use tokio::signal;
 
-#[tokio::main]
+#[async_std::main]
 #[instrument(err)]
 async fn main() -> Result<()> {
     dotenv::dotenv().ok();
@@ -47,26 +47,14 @@ async fn main() -> Result<()> {
     }
     .build();
 
-    let mut listener = tcp::bind_listener(config.socket().as_tuple()).await?;
-    loop {
-        let next = listener.next();
-        select! {
-            maybe_result = next => {
-                match maybe_result {
-                    Some(Ok(stream)) => {
-                        handler.handle_connection(stream)
-                    }
-                    Some(Err(error)) => {
-                        error!("{}", error);
-                    }
-                    None  => {
-                        info!("TcpListener terminated. Exiting.");
-                        break;
-                    }
-                }
-            }
-            Ok(()) = signal::ctrl_c() => {
-                info!("Exit signal received. Exiting.");
+    let listener = tcp::bind_listener(config.socket().as_tuple()).await?;
+
+    let mut incoming = listener.incoming();
+    while let Some(result) = incoming.next().await {
+        match result {
+            Ok(stream) => handler.handle_connection(stream),
+            Err(error) => {
+                error!("{}", error);
                 break;
             }
         }

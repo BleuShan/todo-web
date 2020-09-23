@@ -2,20 +2,20 @@ use crate::{
     net::tls,
     prelude::*,
 };
-use once_cell::sync::Lazy;
-use std::{
-    collections::BTreeMap,
+use async_std::{
+    io,
     path::{
         Path,
         PathBuf,
     },
-    sync::Arc,
+    sync::{
+        Arc,
+        RwLock,
+    },
 };
-use tokio::{
-    io,
-    sync::RwLock,
-};
-pub use tokio_rustls::server::TlsStream;
+pub use async_tls::server::TlsStream;
+use once_cell::sync::Lazy;
+use std::collections::BTreeMap;
 
 type ServerConfigCacheState = BTreeMap<ServerConfigCacheKey, Arc<tls::ServerConfig>>;
 type SharedServerConfigCacheState = Arc<RwLock<ServerConfigCacheState>>;
@@ -64,7 +64,8 @@ impl ServerConfigCache {
             return Ok(config);
         }
 
-        let (cert_chain, key_der) = try_join!(tls::load_certs(cert), tls::load_key(key))?;
+        let (cert_chain, key_der) =
+            future::try_join(tls::load_certs(cert), tls::load_key(key)).await?;
         let mut config = tls::ServerConfig::new(tls::NoClientAuth::new());
         config
             .set_single_cert(cert_chain, key_der)

@@ -1,13 +1,9 @@
 use crate::prelude::*;
+use async_std::io;
 use base64;
 use rustls::{
     Certificate,
     PrivateKey,
-};
-use tokio::io::{
-    self,
-    AsyncBufRead,
-    AsyncBufReadExt,
 };
 
 /// Extract and decode all PEM sections from `rd`, which begin with `start_mark`

@@ -1,13 +1,11 @@
 use crate::prelude::*;
-use listenfd::ListenFd;
-pub use tokio::net::{
+use async_std::io;
+pub use async_std::net::{
     TcpListener,
     TcpStream,
+    ToSocketAddrs,
 };
-use tokio::{
-    io,
-    net::ToSocketAddrs,
-};
+use listenfd::ListenFd;
 
 #[instrument(err)]
 pub async fn bind_listener<Addr>(addr: Addr) -> io::Result<TcpListener>
@@ -15,7 +13,7 @@ where
     Addr: ToSocketAddrs + Debug,
 {
     match ListenFd::from_env().take_tcp_listener(0)? {
-        Some(listener) => TcpListener::try_from(listener),
+        Some(listener) => Ok(TcpListener::from(listener)),
         None => TcpListener::bind(addr).await,
     }
 }

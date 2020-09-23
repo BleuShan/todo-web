@@ -2,14 +2,16 @@ use crate::{
     net::{
         tcp::TcpStream,
         tls::{
-            server,
+            server::TlsStream,
             TlsAcceptor,
-            TlsStream,
         },
     },
     prelude::*,
 };
-use bytes::BytesMut;
+use async_std::{
+    io,
+    task,
+};
 use std::{
     sync::Arc,
     task::{
@@ -18,7 +20,7 @@ use std::{
     },
 };
 
-const BUFFER_CAPACITY: usize = 8 * 1024;
+const SLICE_CAPACITY: usize = 1024;
 
 #[derive(Default)]
 struct ConnectionHandlerState {
@@ -60,16 +62,23 @@ impl ConnectionHandler {
     #[instrument(skip(self))]
     pub fn handle_connection(&self, stream: TcpStream) {
         let this = self.clone();
-        tokio::spawn(async move {
+        task::spawn(async move {
             let mut connection = this.accept(stream).await?;
-            let mut buf = BytesMut::with_capacity(BUFFER_CAPACITY);
+            let mut slices = [[0u8; SLICE_CAPACITY]; 4];
+            let mut bufs = slices
+                .iter_mut()
+                .map(|slice| io::IoSliceMut::new(slice))
+                .collect::<Vec<_>>();
 
-            connection.read_buf(&mut buf).await?;
-            info!(
-                "{}",
-                String::from_utf8(buf.freeze().to_vec())
-                    .map_err(|_| io::Error::from(io::ErrorKind::InvalidData))?
-            );
+            connection.read_vectored(&mut bufs).await?;
+
+            let mut buf = String::new();
+            for slice in slices.iter() {
+                let s = String::from_utf8(slice.to_vec())
+                    .map_err(|_| io::Error::from(io::ErrorKind::InvalidData))?;
+                buf.push_str(&s);
+            }
+            info!("{}", buf);
             let response = "HTTP/1.1 200 OK\r\n\r\n";
             connection.write_all(response.as_bytes()).await?;
             connection.flush().await?;
@@ -79,7 +88,7 @@ impl ConnectionHandler {
     }
 
     #[instrument(err, skip(self))]
-    async fn accept(&self, stream: TcpStream) -> io::Result<Connection<TcpStream>> {
+    async fn accept(&self, stream: TcpStream) -> io::Result<Connection> {
         if let Some(acceptor) = self.0.tls() {
             let inner = acceptor.accept(stream).await?;
             Ok(Connection::from(inner))
@@ -102,77 +111,24 @@ impl From<ConnectionHandlerState> for ConnectionHandler {
 }
 
 #[pin_project::pin_project(project = PinProjectedConnection)]
-pub enum Connection<Inner>
-where
-    Inner: AsyncRead + AsyncWrite + Unpin,
-{
-    Secured(#[pin] TlsStream<Inner>),
-    Raw(#[pin] Inner),
+pub enum Connection {
+    Secured(#[pin] TlsStream<TcpStream>),
+    Raw(#[pin] TcpStream),
 }
 
-impl<Inner> From<server::TlsStream<Inner>> for Connection<Inner>
-where
-    Inner: AsyncRead + AsyncWrite + Unpin,
-{
-    fn from(inner: server::TlsStream<Inner>) -> Self {
+impl From<TlsStream<TcpStream>> for Connection {
+    fn from(inner: TlsStream<TcpStream>) -> Self {
         Self::Secured(TlsStream::from(inner))
     }
 }
 
-impl<Inner> From<TlsStream<Inner>> for Connection<Inner>
-where
-    Inner: AsyncRead + AsyncWrite + Unpin,
-{
-    fn from(inner: TlsStream<Inner>) -> Self {
-        Self::Secured(inner)
-    }
-}
-
-impl<Inner> From<Inner> for Connection<Inner>
-where
-    Inner: AsyncRead + AsyncWrite + Unpin,
-{
-    fn from(stream: Inner) -> Self {
+impl From<TcpStream> for Connection {
+    fn from(stream: TcpStream) -> Self {
         Self::Raw(stream)
     }
 }
 
-impl<Inner> Deref for Connection<Inner>
-where
-    Inner: AsyncRead + AsyncWrite + Unpin,
-{
-    type Target = Inner;
-
-    fn deref(&self) -> &Self::Target {
-        match self {
-            Connection::Secured(inner) => {
-                let (inner, _) = inner.get_ref();
-                inner
-            }
-            Connection::Raw(inner) => inner,
-        }
-    }
-}
-
-impl<Inner> DerefMut for Connection<Inner>
-where
-    Inner: AsyncRead + AsyncWrite + Unpin,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        match self {
-            Connection::Secured(inner) => {
-                let (inner, _) = inner.get_mut();
-                inner
-            }
-            Connection::Raw(inner) => inner,
-        }
-    }
-}
-
-impl<Inner> AsyncRead for Connection<Inner>
-where
-    Inner: AsyncRead + AsyncWrite + Unpin,
-{
+impl AsyncRead for Connection {
     fn poll_read(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -185,10 +141,7 @@ where
     }
 }
 
-impl<Inner> AsyncWrite for Connection<Inner>
-where
-    Inner: AsyncRead + AsyncWrite + Unpin,
-{
+impl AsyncWrite for Connection {
     fn poll_write(
         self: Pin<&mut Self>,
         cx: &mut Context<'_>,
@@ -207,10 +160,10 @@ where
         }
     }
 
-    fn poll_shutdown(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), io::Error>> {
+    fn poll_close(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Result<(), io::Error>> {
         match Self::project(self) {
-            PinProjectedConnection::Secured(inner) => inner.poll_shutdown(cx),
-            PinProjectedConnection::Raw(inner) => inner.poll_shutdown(cx),
+            PinProjectedConnection::Secured(inner) => inner.poll_close(cx),
+            PinProjectedConnection::Raw(inner) => inner.poll_close(cx),
         }
     }
 }
